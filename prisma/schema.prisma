@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Agency {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  drivers   Driver[]
+  orders    Order[]
+}
+
+model Driver {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+  agencyId  String?
+  agency    Agency?  @relation(fields: [agencyId], references: [id])
+}
+
+model Order {
+  id              String   @id @default(cuid())
+  trackingId      String   @unique
+  status          String   @default("Nouvelle commande")
+  
+  senderName      String
+  senderPhone     String
+  senderAddress   String
+  
+  receiverName    String
+  receiverPhone   String
+  receiverAddress String
+  
+  packageDesc     String
+  packageValue    String?
+  paymentMethod   String
+  
+  driverId        String?
+  driver          Driver?  @relation(fields: [driverId], references: [id])
+  
+  agencyId        String?
+  agency          Agency?  @relation(fields: [agencyId], references: [id])
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
