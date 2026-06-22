@@ -106,7 +106,7 @@ export default async function TrackingPage({ params }: { params: Promise<{ id: s
 
           <div className="px-8">
             {order.status === 'in_delivery' || order.status === 'picked_up' ? (
-              <TrackingMap driverId={order.driverId} />
+              <TrackingMap driverId={order.driverId} receiverAddress={order.receiverAddress} />
             ) : null}
           </div>
 
