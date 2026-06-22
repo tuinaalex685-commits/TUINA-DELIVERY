@@ -93,7 +93,19 @@ export default async function DriverMissionPage({ params }: { params: Promise<{ 
           </h2>
           <div className="space-y-2 text-sm text-slate-700">
             <p><span className="font-medium text-slate-900">Description:</span> {order.packageDesc}</p>
-            <p><span className="font-medium text-slate-900">À récupérer:</span> {order.paymentMethod === 'on_delivery' ? order.packageValue || 'Prix de la livraison' : 'Déjà payé ou autre'}</p>
+            <p><span className="font-medium text-slate-900">Méthode de paiement:</span> <span className="uppercase">{order.paymentMethod.replace('_', ' ')}</span></p>
+            <p><span className="font-medium text-slate-900">Statut:</span> <span className={`font-bold ${order.paymentStatus === 'Payé' ? 'text-emerald-600' : 'text-orange-600'}`}>{order.paymentStatus}</span></p>
+            <p className="mt-2 p-2 bg-slate-50 rounded border border-slate-100">
+              <span className="font-bold text-slate-900 block mb-1">Action requise (Paiement) :</span> 
+              {order.paymentMethod === 'on_delivery' 
+                ? `Encaisser le client à la livraison (${order.packageValue || 'frais de livraison'})` 
+                : order.paymentMethod === 'mobile_money' && order.paymentStatus === 'Payé'
+                  ? 'Rien à encaisser (Déjà payé par Mobile Money)'
+                  : order.paymentMethod === 'mobile_money'
+                    ? 'Rien à encaisser (Le client doit payer l\'agence par Mobile Money)'
+                    : 'Encaisser à la collecte'
+              }
+            </p>
           </div>
         </div>
 

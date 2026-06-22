@@ -11,6 +11,7 @@ export const orderSchema = z.object({
   packageDesc: z.string().min(2, "La description du colis est requise"),
   packageValue: z.string().optional().nullable(),
   paymentMethod: z.string().min(1, "La méthode de paiement est requise"),
+  transactionId: z.string().optional().nullable(),
 });
 
 export const driverSchema = z.object({

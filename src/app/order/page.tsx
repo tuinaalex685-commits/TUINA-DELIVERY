@@ -21,7 +21,7 @@ function SubmitButton() {
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 
-function OrderForm() {
+function OrderForm({ agency }: { agency: any }) {
   const searchParams = useSearchParams();
   const agencyId = searchParams.get('agency');
   const [paymentMethod, setPaymentMethod] = useState('mobile_money');
@@ -62,7 +62,7 @@ function OrderForm() {
     <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Tuina Delivery</h1>
+          <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">{agency?.name || 'Tuina Delivery'}</h1>
           <p className="mt-3 text-lg text-slate-500">
             Créez votre demande de livraison en quelques secondes.
           </p>
@@ -187,17 +187,17 @@ function OrderForm() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <input type="hidden" name="paymentMethod" value={paymentMethod} />
               <label 
-                className={`relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none transition-colors ${paymentMethod === 'mobile_money' ? 'bg-brand-50 border-brand-500 ring-1 ring-brand-500' : 'bg-white border-slate-300 hover:bg-slate-50'}`}
+                className={`relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none transition-colors ${paymentMethod === 'mobile_money' ? 'bg-orange-50 border-orange-500 ring-1 ring-orange-500' : 'bg-white border-slate-300 hover:bg-slate-50'}`}
                 onClick={() => setPaymentMethod('mobile_money')}
               >
                 <input type="radio" name="payment" value="mobile_money" className="sr-only" checked={paymentMethod === 'mobile_money'} readOnly />
                 <span className="flex flex-1">
                   <span className="flex flex-col">
-                    <span className="block text-sm font-medium text-slate-900">Mobile Money</span>
-                    <span className="mt-1 flex items-center text-sm text-slate-500">Payer maintenant</span>
+                    <span className="block text-sm font-medium text-slate-900">Orange Money</span>
+                    <span className="mt-1 flex items-center text-xs text-slate-500">Paiement par dépôt</span>
                   </span>
                 </span>
-                <CreditCard className={`h-5 w-5 ${paymentMethod === 'mobile_money' ? 'text-brand-600' : 'text-slate-400'}`} />
+                <CreditCard className={`h-5 w-5 ${paymentMethod === 'mobile_money' ? 'text-orange-600' : 'text-slate-400'}`} />
               </label>
               
               <label 
@@ -208,7 +208,7 @@ function OrderForm() {
                 <span className="flex flex-1">
                   <span className="flex flex-col">
                     <span className="block text-sm font-medium text-slate-900">À la livraison</span>
-                    <span className="mt-1 flex items-center text-sm text-slate-500">Le destinataire paie</span>
+                    <span className="mt-1 flex items-center text-xs text-slate-500">Le destinataire paie</span>
                   </span>
                 </span>
                 <MapPin className={`h-5 w-5 ${paymentMethod === 'on_delivery' ? 'text-brand-600' : 'text-slate-400'}`} />
@@ -222,12 +222,36 @@ function OrderForm() {
                 <span className="flex flex-1">
                   <span className="flex flex-col">
                     <span className="block text-sm font-medium text-slate-900">À la collecte</span>
-                    <span className="mt-1 flex items-center text-sm text-slate-500">Vous payez</span>
+                    <span className="mt-1 flex items-center text-xs text-slate-500">Vous payez</span>
                   </span>
                 </span>
                 <User className={`h-5 w-5 ${paymentMethod === 'on_pickup' ? 'text-brand-600' : 'text-slate-400'}`} />
               </label>
             </div>
+
+            {paymentMethod === 'mobile_money' && (
+              <div className="mt-4 p-5 bg-orange-50 border border-orange-200 rounded-lg">
+                {agency?.orangeMoneyNumber ? (
+                  <>
+                    <p className="text-sm text-orange-800 font-medium mb-1">Veuillez effectuer votre dépôt Orange Money sur ce numéro :</p>
+                    <p className="text-2xl font-black text-orange-600 tracking-widest mb-4">{agency.orangeMoneyNumber}</p>
+                  </>
+                ) : (
+                  <p className="text-sm text-red-600 font-medium mb-4">Le numéro Orange Money de l'agence n'est pas encore configuré.</p>
+                )}
+                
+                <label htmlFor="transactionId" className="block text-sm font-bold text-slate-700">Numéro de Transaction (ID du SMS)</label>
+                <input 
+                  type="text" 
+                  id="transactionId" 
+                  name="transactionId" 
+                  required={!!agency?.orangeMoneyNumber}
+                  className="mt-1 block w-full rounded-md border-slate-300 px-4 py-3 text-sm border focus:ring-brand-500 focus:border-brand-500 bg-white" 
+                  placeholder="Ex: PPXXXXXXXXXX" 
+                />
+                <p className="text-xs text-slate-500 mt-2">Votre commande ne sera validée qu'après vérification du paiement.</p>
+              </div>
+            )}
           </div>
 
           <div className="pt-6">
@@ -240,10 +264,14 @@ function OrderForm() {
   );
 }
 
-export default function OrderPage() {
+import { getAgencySettings } from '../actions/settingsActions';
+
+export default async function OrderPage() {
+  const agency = await getAgencySettings();
+
   return (
     <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center font-bold text-slate-500">Chargement...</div>}>
-      <OrderForm />
+      <OrderForm agency={agency} />
     </Suspense>
   );
 }

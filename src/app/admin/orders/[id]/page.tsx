@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { ArrowLeft, User, MapPin, Package, Phone, CheckCircle2, Copy, Truck } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
 import CopyButton from './CopyButton';
-import { assignDriver } from '@/app/actions/orderActions';
+import { assignDriver, updatePaymentStatus } from '@/app/actions/orderActions';
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
@@ -144,7 +144,34 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
               <p className="text-slate-700"><span className="text-slate-500 w-24 inline-block">Valeur:</span> <span className="font-medium">{order.packageValue || 'Non spécifiée'}</span></p>
             </div>
             <div className="space-y-3">
-              <p className="text-slate-700"><span className="text-slate-500 w-24 inline-block">Paiement:</span> <span className="font-medium uppercase">{order.paymentMethod.replace('_', ' ')}</span></p>
+              <p className="text-slate-700"><span className="text-slate-500 w-24 inline-block">Méthode:</span> <span className="font-medium uppercase bg-slate-100 px-2 py-1 rounded text-xs">{order.paymentMethod.replace('_', ' ')}</span></p>
+              
+              <div className="flex items-center gap-2">
+                <span className="text-slate-500 w-24 inline-block">Statut:</span>
+                <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold ${
+                  order.paymentStatus === 'Payé' ? 'bg-emerald-100 text-emerald-800' : 
+                  order.paymentStatus === 'En attente' ? 'bg-orange-100 text-orange-800' : 
+                  'bg-red-100 text-red-800'
+                }`}>
+                  {order.paymentStatus}
+                </span>
+              </div>
+
+              {order.transactionId && (
+                <p className="text-slate-700"><span className="text-slate-500 w-24 inline-block">ID Transac.:</span> <span className="font-mono text-sm bg-slate-50 px-2 py-1 border border-slate-200 rounded">{order.transactionId}</span></p>
+              )}
+
+              {order.paymentMethod === 'mobile_money' && order.paymentStatus !== 'Payé' && (
+                <form action={async () => {
+                  "use server";
+                  await updatePaymentStatus(order.trackingId, "Payé");
+                }} className="pt-2">
+                  <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm flex justify-center items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" /> Marquer comme payé
+                  </button>
+                  <p className="text-xs text-slate-500 mt-2 text-center">Assurez-vous d'avoir reçu le dépôt Orange Money avant de valider.</p>
+                </form>
+              )}
             </div>
           </div>
         </div>

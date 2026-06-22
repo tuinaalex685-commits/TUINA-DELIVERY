@@ -28,6 +28,7 @@ export async function createOrder(formData: FormData) {
     packageDesc: formData.get("packageDesc") as string,
     packageValue: formData.get("packageValue") as string,
     paymentMethod: formData.get("paymentMethod") as string,
+    transactionId: formData.get("transactionId") as string,
   };
 
   const validationResult = orderSchema.safeParse(rawData);
@@ -51,6 +52,8 @@ export async function createOrder(formData: FormData) {
       packageDesc: data.packageDesc,
       packageValue: data.packageValue || null,
       paymentMethod: data.paymentMethod,
+      paymentStatus: data.paymentMethod === 'mobile_money' ? "En attente" : "Non payé",
+      transactionId: data.transactionId || null,
       agencyId: data.agencyId || null,
       status: "pending"
     }
@@ -77,6 +80,15 @@ export async function assignDriver(trackingId: string, driverId: string) {
       driverId, 
       status: "assigned" 
     }
+  });
+  revalidatePath("/admin");
+  revalidatePath(`/admin/orders/${trackingId}`);
+}
+
+export async function updatePaymentStatus(trackingId: string, paymentStatus: string) {
+  await prisma.order.update({
+    where: { trackingId },
+    data: { paymentStatus }
   });
   revalidatePath("/admin");
   revalidatePath(`/admin/orders/${trackingId}`);

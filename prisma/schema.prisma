@@ -21,6 +21,11 @@ model Agency {
   updatedAt         DateTime  @updatedAt
   emailVerified     DateTime?
   verificationToken String?
+  
+  name              String?   @default("Tuina Delivery")
+  whatsappNumber    String?
+  orangeMoneyNumber String?
+
   drivers           Driver[]
   orders            Order[]
 }
@@ -55,6 +60,8 @@ model Order {
   packageDesc     String
   packageValue    String?
   paymentMethod   String
+  paymentStatus   String   @default("Non payé")
+  transactionId   String?
   
   driverId        String?
   driver          Driver?  @relation(fields: [driverId], references: [id])
