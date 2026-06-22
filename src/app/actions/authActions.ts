@@ -7,6 +7,8 @@ import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 
 import { authSchema } from "@/lib/validations";
+import { sendVerificationEmail } from "@/lib/email";
+import crypto from "crypto";
 
 export async function signupAction(formData: FormData) {
   const rawData = {
@@ -21,30 +23,27 @@ export async function signupAction(formData: FormData) {
   
   const { email, password } = validationResult.data;
 
-  // Vérifier si une agence existe déjà (si on veut limiter à une seule, décommenter)
-  /*
-  const existingAgencyCount = await prisma.agency.count();
-  if (existingAgencyCount > 0) {
-    return { error: "Une agence est déjà enregistrée sur ce système." };
-  }
-  */
-
   const existingEmail = await prisma.agency.findUnique({ where: { email } });
   if (existingEmail) {
     return { error: "Cet email est déjà utilisé." };
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
+  const verificationToken = crypto.randomBytes(32).toString('hex');
 
-  const agency = await prisma.agency.create({
-    data: { email, password: hashedPassword }
+  await prisma.agency.create({
+    data: { 
+      email, 
+      password: hashedPassword,
+      verificationToken 
+    }
   });
 
-  // Créer la session
-  const session = await encrypt({ agencyId: agency.id, email: agency.email });
-  (await cookies()).set("session", session, { httpOnly: true, secure: true, sameSite: "lax", maxAge: 60 * 60 * 24 * 7 });
+  // Envoi de l'email de vérification
+  await sendVerificationEmail(email, verificationToken);
 
-  redirect("/admin");
+  // Redirection vers une page d'attente
+  redirect("/verify-email?sent=true");
 }
 
 export async function loginAction(formData: FormData) {
@@ -63,6 +62,10 @@ export async function loginAction(formData: FormData) {
   const agency = await prisma.agency.findUnique({ where: { email } });
   if (!agency) {
     return { error: "Email ou mot de passe incorrect." };
+  }
+
+  if (!agency.emailVerified) {
+    return { error: "Veuillez vérifier votre email avant de vous connecter." };
   }
 
   const isValid = await bcrypt.compare(password, agency.password);
