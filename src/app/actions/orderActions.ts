@@ -7,35 +7,44 @@ function generateTrackingId() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
+import { orderSchema } from "@/lib/validations";
+
 export async function createOrder(formData: FormData) {
-  const agencyId = formData.get('agencyId') as string;
-  const senderName = formData.get("senderName") as string;
-  const senderPhone = formData.get("senderPhone") as string;
-  const senderAddress = formData.get("senderAddress") as string;
+  const rawData = {
+    agencyId: formData.get('agencyId') as string,
+    senderName: formData.get("senderName") as string,
+    senderPhone: formData.get("senderPhone") as string,
+    senderAddress: formData.get("senderAddress") as string,
+    receiverName: formData.get("receiverName") as string,
+    receiverPhone: formData.get("receiverPhone") as string,
+    receiverAddress: formData.get("receiverAddress") as string,
+    packageDesc: formData.get("packageDesc") as string,
+    packageValue: formData.get("packageValue") as string,
+    paymentMethod: formData.get("paymentMethod") as string,
+  };
+
+  const validationResult = orderSchema.safeParse(rawData);
   
-  const receiverName = formData.get("receiverName") as string;
-  const receiverPhone = formData.get("receiverPhone") as string;
-  const receiverAddress = formData.get("receiverAddress") as string;
-  
-  const packageDesc = formData.get("packageDesc") as string;
-  const packageValue = formData.get("packageValue") as string;
-  const paymentMethod = formData.get("paymentMethod") as string;
+  if (!validationResult.success) {
+    throw new Error(validationResult.error.errors[0].message);
+  }
 
   const trackingId = generateTrackingId();
+  const data = validationResult.data;
 
   const newOrder = await prisma.order.create({
     data: {
       trackingId,
-      senderName,
-      senderPhone,
-      senderAddress,
-      receiverName,
-      receiverPhone,
-      receiverAddress,
-      packageDesc,
-      packageValue: packageValue || null,
-      paymentMethod,
-      agencyId: agencyId || null,
+      senderName: data.senderName,
+      senderPhone: data.senderPhone,
+      senderAddress: data.senderAddress,
+      receiverName: data.receiverName,
+      receiverPhone: data.receiverPhone,
+      receiverAddress: data.receiverAddress,
+      packageDesc: data.packageDesc,
+      packageValue: data.packageValue || null,
+      paymentMethod: data.paymentMethod,
+      agencyId: data.agencyId || null,
       status: "pending"
     }
   });

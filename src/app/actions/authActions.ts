@@ -6,13 +6,20 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 
-export async function signupAction(formData: FormData) {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+import { authSchema } from "@/lib/validations";
 
-  if (!email || !password) {
-    return { error: "Veuillez remplir tous les champs." };
+export async function signupAction(formData: FormData) {
+  const rawData = {
+    email: formData.get("email") as string,
+    password: formData.get("password") as string,
+  };
+
+  const validationResult = authSchema.safeParse(rawData);
+  if (!validationResult.success) {
+    return { error: validationResult.error.errors[0].message };
   }
+  
+  const { email, password } = validationResult.data;
 
   // Vérifier si une agence existe déjà (si on veut limiter à une seule, décommenter)
   /*
@@ -41,12 +48,17 @@ export async function signupAction(formData: FormData) {
 }
 
 export async function loginAction(formData: FormData) {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+  const rawData = {
+    email: formData.get("email") as string,
+    password: formData.get("password") as string,
+  };
 
-  if (!email || !password) {
-    return { error: "Veuillez remplir tous les champs." };
+  const validationResult = authSchema.safeParse(rawData);
+  if (!validationResult.success) {
+    return { error: validationResult.error.errors[0].message };
   }
+
+  const { email, password } = validationResult.data;
 
   const agency = await prisma.agency.findUnique({ where: { email } });
   if (!agency) {
