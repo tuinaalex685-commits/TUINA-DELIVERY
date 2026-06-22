@@ -3,6 +3,7 @@ import { MapPin, Phone, Package, Box } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import StatusButtons from './StatusButtons';
+import DriverMap from '@/components/DriverMap';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,7 +39,16 @@ export default async function DriverMissionPage({ params }: { params: Promise<{ 
         </div>
       </div>
 
-      <div className="p-4 space-y-4 -mt-4 relative z-10">
+      <div className="relative z-10 -mt-2 mb-4 mx-4 shadow-sm rounded-2xl overflow-hidden border border-slate-100">
+        <DriverMap 
+          driverId={order.driverId} 
+          currentStatus={order.status} 
+          senderAddress={order.senderAddress}
+          receiverAddress={order.receiverAddress}
+        />
+      </div>
+
+      <div className="p-4 space-y-4 relative z-10">
         
         {/* Point de collecte */}
         <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden">

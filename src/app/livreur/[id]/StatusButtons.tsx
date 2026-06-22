@@ -1,5 +1,5 @@
 'use client';
-import React, { useTransition, useEffect, useState } from 'react';
+import React, { useTransition } from 'react';
 import { Box, Truck, CheckCircle2 } from 'lucide-react';
 import { updateOrderStatus } from '@/app/actions/orderActions';
 import { useRouter } from 'next/navigation';
@@ -7,41 +7,6 @@ import { useRouter } from 'next/navigation';
 export default function StatusButtons({ trackingId, currentStatus, driverId }: { trackingId: string, currentStatus: string, driverId: string | null }) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const [isSharingLocation, setIsSharingLocation] = useState(false);
-
-  useEffect(() => {
-    let watchId: number;
-
-    if (driverId && (currentStatus === 'picked_up' || currentStatus === 'in_delivery')) {
-      setIsSharingLocation(true);
-      if ('geolocation' in navigator) {
-        watchId = navigator.geolocation.watchPosition(
-          async (position) => {
-            const { latitude, longitude } = position.coords;
-            try {
-              await fetch(`/api/driver/${driverId}/location`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ latitude, longitude }),
-              });
-            } catch (error) {
-              console.error("Erreur d'envoi de la position:", error);
-            }
-          },
-          (error) => {
-            console.error("Erreur GPS:", error);
-          },
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-        );
-      }
-    } else {
-      setIsSharingLocation(false);
-    }
-
-    return () => {
-      if (watchId) navigator.geolocation.clearWatch(watchId);
-    };
-  }, [driverId, currentStatus]);
 
   const handleUpdate = (newStatus: string) => {
     startTransition(async () => {
