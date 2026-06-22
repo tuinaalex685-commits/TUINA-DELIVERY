@@ -2,6 +2,7 @@ import React from 'react';
 import { CheckCircle2, Circle, Clock, MapPin, Package, Truck } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import TrackingMap from '@/components/TrackingMap';
 
 export const dynamic = 'force-dynamic';
 
@@ -101,6 +102,12 @@ export default async function TrackingPage({ params }: { params: Promise<{ id: s
                 ))}
               </div>
             </div>
+          </div>
+
+          <div className="px-8">
+            {order.status === 'in_delivery' || order.status === 'picked_up' ? (
+              <TrackingMap driverId={order.driverId} />
+            ) : null}
           </div>
 
           <div className="bg-slate-50 p-6 border-t border-slate-100">

@@ -89,7 +89,7 @@ export default async function DriverMissionPage({ params }: { params: Promise<{ 
 
       </div>
 
-      <StatusButtons trackingId={order.trackingId} currentStatus={order.status} />
+      <StatusButtons trackingId={order.trackingId} currentStatus={order.status} driverId={order.driverId} />
     </div>
   );
 }
