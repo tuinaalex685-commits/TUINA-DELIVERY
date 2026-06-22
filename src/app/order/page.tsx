@@ -70,6 +70,12 @@ function OrderForm() {
 
         <form action={handleSubmit} className="space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
           <input type="hidden" name="agencyId" value={agencyId || ''} />
+          {/* Anti-Spam Honeypot */}
+          <div className="hidden" aria-hidden="true">
+            <label htmlFor="_website">Laissez ce champ vide si vous êtes humain</label>
+            <input type="text" id="_website" name="_website" tabIndex={-1} autoComplete="off" />
+          </div>
+
           {/* Section Expéditeur */}
           <div>
             <h2 className="text-xl font-bold flex items-center gap-2 text-brand-600 mb-4">

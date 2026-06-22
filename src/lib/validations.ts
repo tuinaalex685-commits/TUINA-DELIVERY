@@ -23,3 +23,8 @@ export const authSchema = z.object({
   email: z.string().email("Format d'email invalide"),
   password: z.string().min(6, "Le mot de passe doit faire au moins 6 caractères"),
 });
+
+export const locationSchema = z.object({
+  latitude: z.coerce.number().min(-90, "Latitude invalide").max(90, "Latitude invalide"),
+  longitude: z.coerce.number().min(-180, "Longitude invalide").max(180, "Longitude invalide"),
+});

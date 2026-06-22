@@ -10,6 +10,13 @@ function generateTrackingId() {
 import { orderSchema } from "@/lib/validations";
 
 export async function createOrder(formData: FormData) {
+  // Anti-Spam (Honeypot) Check
+  const honeypot = formData.get("_website");
+  if (honeypot) {
+    // Si un bot remplit le champ caché, on fait semblant que ça a marché pour ne pas l'alerter
+    return { success: true, trackingId: "B0T-DETECTED-IGNORE" };
+  }
+
   const rawData = {
     agencyId: formData.get('agencyId') as string,
     senderName: formData.get("senderName") as string,
