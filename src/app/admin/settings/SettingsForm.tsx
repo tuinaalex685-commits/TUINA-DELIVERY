@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { updateAgencySettings } from '../actions/settingsActions';
+import { updateAgencySettings } from '../../actions/settingsActions';
 
 export default function SettingsForm({ agency }: { agency: any }) {
   const [loading, setLoading] = useState(false);

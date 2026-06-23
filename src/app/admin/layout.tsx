@@ -60,6 +60,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Users className="w-6 h-6" />
           <span className="text-[10px] font-medium mt-1">Livreurs</span>
         </Link>
+        <Link href="/admin/settings" className="flex flex-col items-center text-slate-500 hover:text-brand-600">
+          <Settings className="w-6 h-6" />
+          <span className="text-[10px] font-medium mt-1">Réglages</span>
+        </Link>
         <form action={logoutAction} className="flex flex-col items-center">
           <button type="submit" className="flex flex-col items-center text-slate-500 hover:text-red-600">
             <LogOut className="w-6 h-6" />

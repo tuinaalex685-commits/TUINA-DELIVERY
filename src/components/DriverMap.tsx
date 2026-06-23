@@ -13,6 +13,8 @@ interface DriverMapProps {
   receiverAddress: string;
 }
 
+import { Geolocation } from '@capacitor/geolocation';
+
 export default function DriverMap({ driverId, currentStatus, senderAddress, receiverAddress }: DriverMapProps) {
   const [location, setLocation] = useState<{ latitude: number, longitude: number } | null>(null);
   const [targetDestination, setTargetDestination] = useState<{ latitude: number, longitude: number } | null>(null);
@@ -25,36 +27,48 @@ export default function DriverMap({ driverId, currentStatus, senderAddress, rece
 
   // 1. Suivi GPS du livreur et envoi au serveur
   useEffect(() => {
-    let watchId: number;
+    let watchId: string;
 
     if (driverId) {
-      if ('geolocation' in navigator) {
-        watchId = navigator.geolocation.watchPosition(
-          async (position) => {
-            const { latitude, longitude } = position.coords;
-            setLocation({ latitude, longitude });
-            
-            // Envoi de la position au serveur (pour le suivi client)
-            try {
-              await fetch(`/api/driver/${driverId}/location`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ latitude, longitude }),
-              });
-            } catch (error) {
-              console.error("Erreur d'envoi de la position:", error);
+      const startTracking = async () => {
+        try {
+          // Demander les permissions avant de suivre
+          await Geolocation.requestPermissions();
+          
+          watchId = await Geolocation.watchPosition(
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+            async (position, err) => {
+              if (err) {
+                console.error("Erreur GPS:", err);
+                return;
+              }
+              if (position) {
+                const { latitude, longitude } = position.coords;
+                setLocation({ latitude, longitude });
+                
+                // Envoi de la position au serveur (pour le suivi client)
+                try {
+                  await fetch(`/api/driver/${driverId}/location`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ latitude, longitude }),
+                  });
+                } catch (error) {
+                  console.error("Erreur d'envoi de la position:", error);
+                }
+              }
             }
-          },
-          (error) => {
-            console.error("Erreur GPS:", error);
-          },
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-        );
-      }
+          );
+        } catch (error) {
+          console.error("Impossible de démarrer le suivi GPS:", error);
+        }
+      };
+
+      startTracking();
     }
 
     return () => {
-      if (watchId) navigator.geolocation.clearWatch(watchId);
+      if (watchId) Geolocation.clearWatch({ id: watchId });
     };
   }, [driverId]);
 
