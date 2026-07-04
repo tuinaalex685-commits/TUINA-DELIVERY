@@ -34,7 +34,7 @@ export async function createOrder(formData: FormData) {
   const validationResult = orderSchema.safeParse(rawData);
   
   if (!validationResult.success) {
-    throw new Error(validationResult.error.errors[0].message);
+    throw new Error(validationResult.error.issues[0].message);
   }
 
   const trackingId = generateTrackingId();

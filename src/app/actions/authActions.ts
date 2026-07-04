@@ -18,7 +18,7 @@ export async function signupAction(prevState: any, formData: FormData) {
 
   const validationResult = authSchema.safeParse(rawData);
   if (!validationResult.success) {
-    return { error: validationResult.error.errors[0].message };
+    return { error: validationResult.error.issues[0].message };
   }
   
   const { email, password } = validationResult.data;
@@ -54,7 +54,7 @@ export async function loginAction(prevState: any, formData: FormData) {
 
   const validationResult = authSchema.safeParse(rawData);
   if (!validationResult.success) {
-    return { error: validationResult.error.errors[0].message };
+    return { error: validationResult.error.issues[0].message };
   }
 
   const { email, password } = validationResult.data;

@@ -19,7 +19,7 @@ export async function addDriver(formData: FormData): Promise<void> {
   const validationResult = driverSchema.safeParse(rawData);
 
   if (!validationResult.success) {
-    throw new Error(validationResult.error.errors[0].message);
+    throw new Error(validationResult.error.issues[0].message);
   }
 
   await prisma.driver.create({
