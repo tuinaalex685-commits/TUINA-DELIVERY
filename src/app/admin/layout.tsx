@@ -1,4 +1,5 @@
 import React from 'react';
+export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import { LayoutDashboard, Users, Package, Settings, LogOut } from 'lucide-react';
 import { logoutAction } from '@/app/actions/authActions';
