@@ -4,8 +4,13 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
 export async function getAgencySettings() {
-  const agency = await prisma.agency.findFirst();
-  return agency;
+  try {
+    const agency = await prisma.agency.findFirst();
+    return agency;
+  } catch (error) {
+    console.error("Database connection error in getAgencySettings:", error);
+    return null;
+  }
 }
 
 export async function updateAgencySettings(formData: FormData) {

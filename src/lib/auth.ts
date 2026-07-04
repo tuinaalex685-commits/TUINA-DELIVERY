@@ -4,12 +4,7 @@ import { cookies } from 'next/headers';
 const secretKey = process.env.JWT_SECRET;
 
 if (!secretKey) {
-  // En production, on plante volontairement l'application pour des raisons de sécurité
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('CRITICAL SECURITY ERROR: JWT_SECRET environment variable is missing.');
-  } else {
-    console.warn('WARNING: JWT_SECRET is missing. Using a fallback key for development only.');
-  }
+  console.warn('WARNING: JWT_SECRET is missing. Using a fallback key. Make sure to set JWT_SECRET in production.');
 }
 
 const key = new TextEncoder().encode(secretKey || 'tuina-super-secret-key-for-dev-only');

@@ -23,24 +23,29 @@ export async function signupAction(prevState: any, formData: FormData) {
   
   const { email, password } = validationResult.data;
 
-  const existingEmail = await prisma.agency.findUnique({ where: { email } });
-  if (existingEmail) {
-    return { error: "Cet email est déjà utilisé." };
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const verificationToken = crypto.randomBytes(32).toString('hex');
-
-  await prisma.agency.create({
-    data: { 
-      email, 
-      password: hashedPassword,
-      verificationToken 
+  try {
+    const existingEmail = await prisma.agency.findUnique({ where: { email } });
+    if (existingEmail) {
+      return { error: "Cet email est déjà utilisé." };
     }
-  });
 
-  // Envoi de l'email de vérification
-  await sendVerificationEmail(email, verificationToken);
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+
+    await prisma.agency.create({
+      data: { 
+        email, 
+        password: hashedPassword,
+        verificationToken 
+      }
+    });
+
+    // Envoi de l'email de vérification
+    await sendVerificationEmail(email, verificationToken);
+  } catch (error) {
+    console.error("Signup error:", error);
+    return { error: "Impossible de se connecter à la base de données. Vérifiez vos identifiants Supabase." };
+  }
 
   // Redirection vers une page d'attente
   redirect("/verify-email?sent=true");
@@ -59,7 +64,14 @@ export async function loginAction(prevState: any, formData: FormData) {
 
   const { email, password } = validationResult.data;
 
-  const agency = await prisma.agency.findUnique({ where: { email } });
+  let agency;
+  try {
+    agency = await prisma.agency.findUnique({ where: { email } });
+  } catch (error) {
+    console.error("Login DB error:", error);
+    return { error: "Impossible de se connecter à la base de données. Vérifiez vos identifiants Supabase." };
+  }
+
   if (!agency) {
     return { error: "Email ou mot de passe incorrect." };
   }
