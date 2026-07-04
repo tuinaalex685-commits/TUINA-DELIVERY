@@ -6,12 +6,7 @@ import Link from "next/link";
 import { Truck } from "lucide-react";
 
 export default function LoginPage() {
-  const [state, formAction, pending] = useActionState(
-    async (prevState: any, formData: FormData) => {
-      return await loginAction(formData);
-    },
-    null
-  );
+  const [state, formAction, pending] = useActionState(loginAction, null);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">

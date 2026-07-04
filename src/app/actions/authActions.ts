@@ -10,7 +10,7 @@ import { authSchema } from "@/lib/validations";
 import { sendVerificationEmail } from "@/lib/email";
 import crypto from "crypto";
 
-export async function signupAction(formData: FormData) {
+export async function signupAction(prevState: any, formData: FormData) {
   const rawData = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
@@ -46,7 +46,7 @@ export async function signupAction(formData: FormData) {
   redirect("/verify-email?sent=true");
 }
 
-export async function loginAction(formData: FormData) {
+export async function loginAction(prevState: any, formData: FormData) {
   const rawData = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
