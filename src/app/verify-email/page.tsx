@@ -1,8 +1,9 @@
 export const dynamic = 'force-dynamic';
 
-export default function VerifyEmailPage({ searchParams }: { searchParams: { sent?: string, error?: string } }) {
-  const isSent = searchParams.sent === "true";
-  const error = searchParams.error;
+export default async function VerifyEmailPage({ searchParams }: { searchParams: Promise<{ sent?: string, error?: string }> }) {
+  const resolvedSearchParams = await searchParams;
+  const isSent = resolvedSearchParams.sent === "true";
+  const error = resolvedSearchParams.error;
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
